@@ -26,7 +26,7 @@ Telecom churn dataset containing:
    * Recall
    * ROC-AUC
 
-## Tools Used
+## Tool & Library Used
 
 * R
 * ggplot2
