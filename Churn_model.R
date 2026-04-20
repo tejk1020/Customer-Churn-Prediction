@@ -38,10 +38,7 @@ model_log <- glm(Churn ~ tenure + MonthlyCharges + TotalCharges +
                  family = "binomial")
 print(model_log)
 
-
-pred_dt <- predict(model_log, test, type = "terms")
-
-# 8. Predictions
+# 8. Predictions (prob)
 prob <- predict(model_log, newdata = test, type = "response")
 
 # Convert probabilities to class labels
@@ -51,13 +48,10 @@ pred <- as.factor(pred)
 # 9 Recall calculation
 # True Positives
 TP <- sum(pred == "Yes" & test$Churn == "Yes")
-
 # False Negatives
 FN <- sum(pred == "No" & test$Churn == "Yes")
-
 # Recall
 recall <- TP / (TP + FN)
-
 print(paste("Recall:", recall))
 
 # 10. Accuracy
