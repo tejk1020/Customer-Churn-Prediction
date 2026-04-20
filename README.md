@@ -41,12 +41,12 @@ Telecom churn dataset containing:
 ## Visualizations
 
 ### Churn Distribution
-<img width="796" height="492" alt="churn_distribution" src="https://github.com/user-attachments/assets/bb665948-85e2-45ff-90bb-5cb4f630295e" />
+<img width="600" height="400" alt="churn_distribution" src="https://github.com/user-attachments/assets/bb665948-85e2-45ff-90bb-5cb4f630295e" />
 
 ### Tenure vs Churn
-<img width="796" height="492" alt="Tenure vs Churn" src="https://github.com/user-attachments/assets/d1e2debc-1c42-48db-b434-4756f2c7b70c" />
+<img width="600" height="400" alt="Tenure vs Churn" src="https://github.com/user-attachments/assets/d1e2debc-1c42-48db-b434-4756f2c7b70c" />
 
 ### ROC Curve
-<img width="796" height="492" alt="ROC Curve" src="https://github.com/user-attachments/assets/0a92c5f2-f564-4747-8e93-b8f4584b662d" />
+<img width="600" height="400" alt="ROC Curve" src="https://github.com/user-attachments/assets/0a92c5f2-f564-4747-8e93-b8f4584b662d" />
 
 
