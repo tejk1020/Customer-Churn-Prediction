@@ -1,9 +1,10 @@
 ## Output
 ### Churn Distribution
-<img width="600" height="400" alt="churn_distribution" src="https://github.com/user-attachments/assets/5039fb22-6714-4218-9679-a4b8c6a71e04" />
+<img width="600" height="400" alt="Churn Distribution" src="https://github.com/user-attachments/assets/ca24bce3-7bea-44b2-84e1-2900f79c8a83" />
 
 ### Tenure vs Churn
-<img width="600" height="400" alt="Tenure vs Churn" src="https://github.com/user-attachments/assets/12fab4f1-cca1-4e1c-9174-5f92e96336ab" />
+<img width="600" height="400" alt="Tenure vs Churn" src="https://github.com/user-attachments/assets/6909dc14-1ab5-4052-8fcd-471293cf211d" />
 
 ### ROC Curve
-<img width="600" height="400" alt="ROC Curve" src="https://github.com/user-attachments/assets/a608c7eb-0796-4510-976d-29798bbb3fb5" />
+<img width="600" height="400" alt="ROC Curve" src="https://github.com/user-attachments/assets/7aac96a8-62e9-4dcc-823a-21478a5f102a" />
+
