@@ -1,66 +1,123 @@
-# 1. Import a dataset
-data <- read.csv("D:/Churn_data.csv")
+# 1. Load Dataset
+data <- read.csv("D://Churn_data.csv")
 
-# 2. Basic inspection
 str(data)
 summary(data)
 
-# 3. Data cleaning
+# 2. Data Cleaning (FIXED)
+# Remove NA
 data <- na.omit(data)
-data$Churn <- as.factor(data$Churn)
 
-# 4. Load libraries
+# Clean target FIRST (CRITICAL)
+data$Churn <- trimws(data$Churn)
+data$Churn <- ifelse(data$Churn %in% c("Yes","yes","1"), 1, 0)
+data$Churn <- as.numeric(data$Churn)
+
+# Convert categorical features to factor
+for(col in names(data)) {
+  if(is.character(data[[col]])) {
+    data[[col]] <- as.factor(data[[col]])
+  }
+}
+
+# 3. EDA
 library(ggplot2)
-library(pROC)
 
-# 5. EDA (visualization)
-# Churn distribution
-ggplot(data, aes(x = Churn)) + 
-  geom_bar(fill = "maroon") + 
-  theme_minimal()
+ggplot(data, aes(x = factor(Churn))) +
+  geom_bar(fill = "steelblue") +
+  theme_minimal() +
+  ggtitle("Churn Distribution")
 
-# Tenure vs Churn
-ggplot(data, aes(x = tenure, fill = Churn)) +
-  geom_histogram(binwidth = 5) +
-  theme_minimal()
+if("tenure" %in% names(data)){
+  ggplot(data, aes(x = tenure, fill = factor(Churn))) +
+    geom_histogram(binwidth = 5, alpha = 0.6, position = "identity") +
+    theme_minimal()
+}
 
-# 6. Train-Test Split
+# 4. Train-Test Split
+library(caret)
+
 set.seed(123)
-train_index <- sample(1:nrow(data), 0.7 * nrow(data))
-train <- data[train_index, ]
-test  <- data[-train_index, ]
+trainIndex <- createDataPartition(data$Churn, p = 0.7, list = FALSE)
 
-# 7. Logistic Regression Model
+train <- data[trainIndex, ]
+test  <- data[-trainIndex, ]
 
-model_log <- glm(Churn ~ tenure + MonthlyCharges + TotalCharges + 
-                   Contract + InternetService,
-                 data = data,
-                 family = "binomial")
-print(model_log)
+# Align factor levels (IMPORTANT)
+for(col in names(train)) {
+  if(is.factor(train[[col]])) {
+    levels(test[[col]]) <- levels(train[[col]])
+  }
+}
 
-# 8. Predictions (prob)
-prob <- predict(model_log, newdata = test, type = "response")
 
-# Convert probabilities to class labels
-pred <- ifelse(prob > 0.5, "Yes", "No")
-pred <- as.factor(pred)
+# 5. Logistic Regression
+train$Churn <- factor(train$Churn)
+test$Churn  <- factor(test$Churn)
 
-# 9 Recall calculation
-# True Positives
-TP <- sum(pred == "Yes" & test$Churn == "Yes")
-# False Negatives
-FN <- sum(pred == "No" & test$Churn == "Yes")
-# Recall
-recall <- TP / (TP + FN)
-print(paste("Recall:", recall))
+model_log <- glm(Churn ~ ., data = train, family = "binomial")
 
-# 10. Accuracy
-accuracy <- mean(pred == test$Churn)
-print(paste("Accuracy:", accuracy))
+prob_log <- predict(model_log, test, type = "response")
+pred_log <- ifelse(prob_log > 0.5, 1, 0)
 
-# 11. ROC Curve & AUC
-roc_obj <- roc(test$Churn, prob)
-plot(roc_obj, col = "purple")
+# 6. Random Forest
+library(randomForest)
 
-auc_value <- auc(roc_obj)
-print(paste("AUC:", auc_value))
+model_rf <- randomForest(Churn ~ ., data = train, ntree = 100)
+pred_rf <- predict(model_rf, test)
+prob_rf <- predict(model_rf, test, type = "prob")[,2]
+
+# 7. XGBoost (FINAL FIX)
+library(xgboost)
+
+# Convert to numeric matrix
+train_matrix <- model.matrix(Churn ~ . -1, data = train)
+test_matrix  <- model.matrix(Churn ~ . -1, data = test)
+
+# Labels MUST be numeric 0/1
+train_label <- as.character(train$Churn)
+test_label  <- as.numeric(as.character(test$Churn))
+
+# Safety check (DON'T REMOVE)
+if(any(is.na(train_label))) stop("NA in train_label")
+if(any(is.infinite(train_label))) stop("Inf in train_label")
+
+model_xgb <- xgboost(
+  x = train_matrix,
+  y = train_label,
+  max_depth = 6,
+  learning_rate = 0.1,
+  nrounds = 100,
+  objective = "binary:logistic"
+)
+
+prob_xgb <- predict(model_xgb, test_matrix)
+pred_xgb <- ifelse(prob_xgb > 0.5, 1, 0)
+
+# 8. Evaluation
+library(pROC)
+library(caret)
+
+# Logistic
+confusionMatrix(factor(pred_log), factor(test_label))
+roc_log <- roc(test_label, prob_log)
+auc(roc_log)
+
+# Random Forest
+confusionMatrix(pred_rf, factor(test_label))
+roc_rf <- roc(test_label, prob_rf)
+auc(roc_rf)
+
+# XGBoost
+confusionMatrix(factor(pred_xgb), factor(test_label))
+roc_xgb <- roc(test_label, prob_xgb)
+auc(roc_xgb)
+
+# 9. ROC Curve
+plot(roc_log, col="blue")
+plot(roc_rf, col="green", add=TRUE)
+plot(roc_xgb, col="red", add=TRUE)
+
+legend("bottomright",
+       legend=c("Logistic","RF","XGB"),
+       col=c("blue","green","red"), lwd=2)
