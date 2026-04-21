@@ -77,7 +77,6 @@ Telecom churn dataset containing:
 ### Tenure vs Churn
 <img width="600" height="400" alt="Tenure vs Churn" src="https://github.com/user-attachments/assets/37bca46e-300d-41be-918e-76c004f0d367" />
 
-
 ### ROC Curve
 <img width="600" height="400" alt="ROC Curve" src="https://github.com/user-attachments/assets/97912b14-26ea-4e32-8652-1e8f1ab7ff62" />
 
