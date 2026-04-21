@@ -1,6 +1,5 @@
-# 1. Load Dataset
-data <- read.csv("D://Churn_data.csv")
-
+# 1. Load Data
+data <- read.csv("D://Churn_data.csv", stringsAsFactors = FALSE)
 str(data)
 summary(data)
 
@@ -50,7 +49,6 @@ for(col in names(train)) {
   }
 }
 
-
 # 5. Logistic Regression
 train$Churn <- factor(train$Churn)
 test$Churn  <- factor(test$Churn)
@@ -64,6 +62,7 @@ pred_log <- ifelse(prob_log > 0.5, 1, 0)
 library(randomForest)
 
 model_rf <- randomForest(Churn ~ ., data = train, ntree = 100)
+
 pred_rf <- predict(model_rf, test)
 prob_rf <- predict(model_rf, test, type = "prob")[,2]
 
@@ -98,20 +97,33 @@ pred_xgb <- ifelse(prob_xgb > 0.5, 1, 0)
 library(pROC)
 library(caret)
 
+# Ensure same format
+test_label <- factor(test_label, levels = c(0,1))
+pred_log <- factor(pred_log, levels = c(0,1))
+pred_rf <- factor(pred_rf, levels = c(0,1))
+pred_xgb <- factor(pred_xgb, levels = c(0,1))
+
 # Logistic
-confusionMatrix(factor(pred_log), factor(test_label))
-roc_log <- roc(test_label, prob_log)
-auc(roc_log)
-
+cm_log <- confusionMatrix(pred_log, test_label)
 # Random Forest
-confusionMatrix(pred_rf, factor(test_label))
-roc_rf <- roc(test_label, prob_rf)
-auc(roc_rf)
-
+cm_rf <- confusionMatrix(pred_rf, test_label)
 # XGBoost
-confusionMatrix(factor(pred_xgb), factor(test_label))
-roc_xgb <- roc(test_label, prob_xgb)
-auc(roc_xgb)
+cm_xgb <- confusionMatrix(pred_xgb, test_label)
+
+# Print results
+cat("RESULTS")
+
+cat("Logistic Regression")
+cat("Accuracy:", as.numeric(cm_log$overall["Accuracy"]), "\n")
+cat("Recall:", as.numeric(cm_log$byClass["Sensitivity"]), "\n")
+
+cat("Random Forest")
+cat("Accuracy:", as.numeric(cm_rf$overall["Accuracy"]), "\n")
+cat("Recall:", as.numeric(cm_rf$byClass["Sensitivity"]), "\n")
+
+cat("XGBoost")
+cat("Accuracy:", as.numeric(cm_xgb$overall["Accuracy"]), "\n")
+cat("Recall:", as.numeric(cm_xgb$byClass["Sensitivity"]), "\n")
 
 # 9. ROC Curve
 plot(roc_log, col="blue")
